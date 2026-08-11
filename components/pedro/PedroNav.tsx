@@ -26,7 +26,7 @@ export function PedroNav() {
           <PedroWordmark />
         </Link>
 
-        <ul className="hidden md:flex items-center gap-1 rounded-pd-pill bg-surface p-1 border border-border-subtle">
+        <ul className="hidden lg:flex items-center gap-1 rounded-pd-pill bg-surface p-1 border border-border-subtle">
           {NAV_ITEMS.map((item) => {
             const active = pathname.startsWith(item.href);
             return (
@@ -102,7 +102,7 @@ export function PedroNav() {
           </div>
         </div>
       </nav>
-      <div className="flex md:hidden items-center gap-1 overflow-x-auto px-4 pb-3">
+      <div className="flex lg:hidden items-center gap-1 overflow-x-auto px-4 pb-3">
         {NAV_ITEMS.map((item) => {
           const active = pathname.startsWith(item.href);
           return (

@@ -103,7 +103,7 @@ export default function AdminLessonsPage() {
             <PedroInput label="Domain ID" value={form.domainId} onChange={(e) => setForm({ ...form, domainId: e.target.value as LessonDefinition["domainId"] })} />
             <PedroInput label="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
             <PedroTextarea label="Summary" value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} rows={2} />
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <PedroInput label="Day" type="number" min={1} max={7} value={form.day} onChange={(e) => setForm({ ...form, day: Number(e.target.value) })} />
               <PedroInput label="Minutes" type="number" value={form.estimatedMinutes} onChange={(e) => setForm({ ...form, estimatedMinutes: Number(e.target.value) })} />
               <PedroInput label="Order" type="number" value={form.order} onChange={(e) => setForm({ ...form, order: Number(e.target.value) })} />

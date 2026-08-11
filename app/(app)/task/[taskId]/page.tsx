@@ -3,10 +3,11 @@
 import { use, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Lightbulb, CheckCircle2, XCircle, PartyPopper } from "lucide-react";
+import { ArrowLeft, Lightbulb, CheckCircle2, XCircle, PartyPopper, AlertTriangle } from "lucide-react";
 import { PedroButton, PedroCard, PedroCardEyebrow, PedroShell } from "@/components/pedro";
 import { MarkdownLite } from "@/components/pedro/MarkdownLite";
 import { PedroReflection } from "@/components/pedro/PedroReflection";
+import { PedroConfetti } from "@/components/pedro/PedroConfetti";
 import { CodeWorkspace } from "@/components/tasks/CodeWorkspace";
 import { SqlWorkspace } from "@/components/tasks/SqlWorkspace";
 import { DesignWorkspace } from "@/components/tasks/DesignWorkspace";
@@ -50,6 +51,7 @@ export default function TaskPage({ params }: { params: Promise<{ taskId: string 
   const [hint, setHint] = useState<{ text: string; order: number } | null>(null);
   const [hintsRemaining, setHintsRemaining] = useState(0);
   const startedRef = useRef(false);
+  const resultRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -96,6 +98,13 @@ export default function TaskPage({ params }: { params: Promise<{ taskId: string 
     track(res.evaluation.passed ? "task_completed" : "task_failed", { score: res.score });
     if (res.xpAward) refreshProfile();
   }
+
+  // Every submission (first run or retry) replaces `result` with a new
+  // object, so this fires each time - scrolling the outcome into view
+  // instead of leaving the learner staring at the editor they just ran.
+  useEffect(() => {
+    if (result) resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [result]);
 
   if (error) {
     return (
@@ -176,12 +185,18 @@ export default function TaskPage({ params }: { params: Promise<{ taskId: string 
       )}
 
       {result && (
-        <PedroCard padding="lg" className="mt-6" tone={result.evaluation.passed ? "mint" : "surface"}>
+        <div ref={resultRef} className="scroll-mt-6">
+        <PedroCard
+          padding="lg"
+          className="relative mt-6 overflow-hidden"
+          tone={result.evaluation.passed ? "mint" : "surface"}
+        >
+          {result.evaluation.passed && <PedroConfetti burstKey={result.attempt.attemptNumber} />}
           <div className="flex items-center gap-2.5">
             {result.evaluation.passed ? (
-              <CheckCircle2 className="size-5 shrink-0" aria-hidden />
+              <CheckCircle2 className="size-5 shrink-0 text-emerald-600" aria-hidden />
             ) : (
-              <XCircle className="size-5 shrink-0 text-text-muted" aria-hidden />
+              <XCircle className="size-5 shrink-0 text-red-500" aria-hidden />
             )}
             <p className="font-semibold">{result.evaluation.summary}</p>
           </div>
@@ -189,17 +204,28 @@ export default function TaskPage({ params }: { params: Promise<{ taskId: string 
             {result.evaluation.breakdown.map((b, i) => (
               <li key={i} className="flex items-start gap-2 text-sm">
                 {b.passed ? (
-                  <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 opacity-70" aria-hidden />
+                  <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-emerald-600" aria-hidden />
                 ) : (
-                  <XCircle className="mt-0.5 size-3.5 shrink-0 opacity-70" aria-hidden />
+                  <XCircle className="mt-0.5 size-3.5 shrink-0 text-red-500" aria-hidden />
                 )}
-                <span>
+                <span className={b.passed ? undefined : "text-red-500"}>
                   {b.label}
-                  {b.detail && <span className="opacity-70"> - {b.detail}</span>}
+                  {b.detail && <span className={b.passed ? "opacity-70" : "text-red-500/80"}> - {b.detail}</span>}
                 </span>
               </li>
             ))}
           </ul>
+          {result.evaluation.warnings && (
+            <div className="mt-4 flex items-start gap-2 rounded-pd-md bg-amber-500/10 p-3 text-sm text-amber-600">
+              <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
+              <div>
+                <p className="font-medium">Compiled with warnings</p>
+                <pre className="mt-1 whitespace-pre-wrap break-words font-mono text-xs opacity-90">
+                  {result.evaluation.warnings}
+                </pre>
+              </div>
+            </div>
+          )}
           {result.xpAward && <PedroXpCelebration award={result.xpAward} />}
           {result.dayCompleted && (
             <div className="mt-4 flex items-center gap-2 rounded-pd-md bg-pd-charcoal/10 p-3 text-sm font-medium">
@@ -208,6 +234,7 @@ export default function TaskPage({ params }: { params: Promise<{ taskId: string 
             </div>
           )}
         </PedroCard>
+        </div>
       )}
 
       {result && !reflected && (

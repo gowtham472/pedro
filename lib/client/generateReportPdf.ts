@@ -52,7 +52,7 @@ export function generateReportPdf(report: CareerReport, userName: string): void 
     y += 6;
   }
 
-  heading("Pedro — Your Exploration Report", 20);
+  heading("Pedro - Your Exploration Report", 20);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(120);
@@ -67,7 +67,7 @@ export function generateReportPdf(report: CareerReport, userName: string): void 
 
   heading("Your strongest signals", 13);
   report.topDomains.forEach((d, i) => {
-    body(`${i + 1}. ${DOMAIN_NAMES[d.domainId] ?? d.domainId} — ${d.score}/100 (${d.confidence} confidence)`);
+    body(`${i + 1}. ${DOMAIN_NAMES[d.domainId] ?? d.domainId} - ${d.score}/100 (${d.confidence} confidence)`);
   });
 
   rule();
@@ -83,7 +83,7 @@ export function generateReportPdf(report: CareerReport, userName: string): void 
   heading("Domain comparison", 13);
   for (const s of report.comparison) {
     body(
-      `${DOMAIN_NAMES[s.domainId] ?? s.domainId} — Performance ${s.performanceScore} · Learning ${s.learningScore} · Engagement ${s.engagementScore} · Preference ${s.preferenceScore} · Confidence: ${s.confidence}`,
+      `${DOMAIN_NAMES[s.domainId] ?? s.domainId} - Performance ${s.performanceScore} · Learning ${s.learningScore} · Engagement ${s.engagementScore} · Preference ${s.preferenceScore} · Confidence: ${s.confidence}`,
       9.5
     );
   }

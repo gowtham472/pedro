@@ -217,7 +217,12 @@ export default function OnboardingPage() {
               <p className="mb-2.5 text-sm font-medium">What have you tried before?</p>
               <div className="flex flex-wrap gap-2">
                 {TRIED_BEFORE_OPTIONS.map((option) => (
-                  <button key={option} type="button" onClick={() => toggleTriedBefore(option)}>
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => toggleTriedBefore(option)}
+                    className="flex min-h-11 items-center"
+                  >
                     <PedroPill tone={baseline.triedBefore.includes(option) ? "mint" : "neutral"}>
                       {option}
                     </PedroPill>

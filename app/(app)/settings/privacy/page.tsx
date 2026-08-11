@@ -122,7 +122,7 @@ export default function PrivacySettingsPage() {
             <Activity className="mt-0.5 size-5 shrink-0 text-text-muted" aria-hidden />
             <PedroToggle
               label="Interaction telemetry"
-              description="Aggregate click/scroll/retry signals — never raw keystrokes or continuous tracking."
+              description="Aggregate click/scroll/retry signals - never raw keystrokes or continuous tracking."
               checked={consent.interactionConsent}
               onChange={(v) => updateConsent({ interactionConsent: v })}
             />
@@ -131,7 +131,7 @@ export default function PrivacySettingsPage() {
             <Eye className="mt-0.5 size-5 shrink-0 text-text-muted" aria-hidden />
             <PedroToggle
               label="Optional webcam / gaze estimation"
-              description="Experimental. Processed locally in your browser — no video is ever stored."
+              description="Experimental. Processed locally in your browser - no video is ever stored."
               checked={consent.gazeConsent}
               onChange={(v) => updateConsent({ gazeConsent: v })}
             />
@@ -160,7 +160,7 @@ export default function PrivacySettingsPage() {
       <PedroCard padding="lg" className="mt-6 border-red-500/20">
         <PedroCardEyebrow>Delete account</PedroCardEyebrow>
         <p className="text-sm text-text-secondary">
-          Permanently deletes your account and all associated data — tasks, reflections, scores, and reports.
+          Permanently deletes your account and all associated data - tasks, reflections, scores, and reports.
           This can&apos;t be undone.
         </p>
         {!confirmDelete ? (

@@ -6,7 +6,7 @@ export type Theme = "light" | "dark";
 
 // A tiny external store over the `data-theme` attribute (set synchronously
 // by the inline script in app/layout.tsx before hydration). useSyncExternalStore
-// is the correct primitive for a client-only value like this — it has a
+// is the correct primitive for a client-only value like this - it has a
 // proper SSR snapshot, and every component reading it re-renders together
 // when the theme changes, unlike a useState+useEffect pair that only syncs
 // itself once on mount.

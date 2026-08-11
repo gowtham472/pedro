@@ -146,12 +146,12 @@ export default function AdminDomainsPage() {
             </div>
             <div>
               <label className="text-sm font-medium">Accent</label>
-              <div className="mt-1.5 flex gap-2">
+              <div className="mt-1.5 flex flex-wrap gap-2">
                 {ACCENTS.map((a) => (
                   <button
                     key={a}
                     onClick={() => setForm({ ...form, accentToken: a })}
-                    className={`rounded-pd-pill border px-3 py-1 text-xs ${form.accentToken === a ? "border-pd-mint bg-pd-mint/10" : "border-border-subtle"}`}
+                    className={`flex min-h-9 items-center rounded-pd-pill border px-3 text-xs ${form.accentToken === a ? "border-pd-mint bg-pd-mint/10" : "border-border-subtle"}`}
                   >
                     {a}
                   </button>

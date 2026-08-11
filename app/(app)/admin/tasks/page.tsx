@@ -28,7 +28,7 @@ const BLANK = {
 
 // Admin form state uses plain strings for id/domainId/lessonId (free text
 // until saved and validated server-side) and an untyped config object
-// (edited directly as JSON — see the rationale in lib/server/validation/content.ts).
+// (edited directly as JSON - see the rationale in lib/server/validation/content.ts).
 type FormState = Omit<TaskDefinition, "config" | "id" | "domainId" | "lessonId"> & {
   id: string;
   domainId: string;
@@ -136,7 +136,7 @@ export default function AdminTasksPage() {
         <PedroCard padding="lg">
           <PedroCardEyebrow>{isNew ? "New task" : `Edit ${form.id}`}</PedroCardEyebrow>
           <div className="flex flex-col gap-3">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <PedroInput label="ID (slug)" value={form.id} disabled={!isNew} onChange={(e) => setForm({ ...form, id: e.target.value })} />
               <PedroInput label="Domain ID" value={form.domainId} onChange={(e) => setForm({ ...form, domainId: e.target.value })} />
             </div>
@@ -144,7 +144,7 @@ export default function AdminTasksPage() {
             <PedroInput label="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
             <PedroTextarea label="Description" value={form.description} rows={2} onChange={(e) => setForm({ ...form, description: e.target.value })} />
             <PedroTextarea label="Instructions (markdown-lite)" value={form.instructions} rows={4} onChange={(e) => setForm({ ...form, instructions: e.target.value })} />
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <PedroInput label="Day" type="number" min={1} max={7} value={form.day} onChange={(e) => setForm({ ...form, day: Number(e.target.value) })} />
               <PedroInput label="Minutes" type="number" value={form.estimatedMinutes} onChange={(e) => setForm({ ...form, estimatedMinutes: Number(e.target.value) })} />
               <PedroInput label="Pass score" type="number" value={form.passingScore} onChange={(e) => setForm({ ...form, passingScore: Number(e.target.value) })} />
@@ -152,12 +152,12 @@ export default function AdminTasksPage() {
             </div>
             <div>
               <label className="text-sm font-medium">Difficulty</label>
-              <div className="mt-1.5 flex gap-2">
+              <div className="mt-1.5 flex flex-wrap gap-2">
                 {(["beginner", "intermediate", "challenge"] as Difficulty[]).map((d) => (
                   <button
                     key={d}
                     onClick={() => setForm({ ...form, difficulty: d })}
-                    className={`rounded-pd-pill border px-3 py-1 text-xs ${form.difficulty === d ? "border-pd-mint bg-pd-mint/10" : "border-border-subtle"}`}
+                    className={`flex min-h-9 items-center rounded-pd-pill border px-3 text-xs ${form.difficulty === d ? "border-pd-mint bg-pd-mint/10" : "border-border-subtle"}`}
                   >
                     {d}
                   </button>
@@ -165,7 +165,7 @@ export default function AdminTasksPage() {
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium">Config (JSON) — task-type specific, edited directly</label>
+              <label className="text-sm font-medium">Config (JSON) - task-type specific, edited directly</label>
               <textarea
                 value={configText}
                 onChange={(e) => {

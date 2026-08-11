@@ -150,6 +150,8 @@ export interface EvaluationDetail {
   passed: boolean;
   breakdown: EvaluationBreakdownItem[];
   testResults?: TestResult[];
+  /** Non-fatal compiler diagnostics (Java/C) - the code still ran and was graded. */
+  warnings?: string;
 }
 
 export interface TaskAttempt {

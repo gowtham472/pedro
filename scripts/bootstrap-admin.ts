@@ -1,5 +1,5 @@
 /**
- * Promotes an existing user to admin by email — for granting admin access
+ * Promotes an existing user to admin by email - for granting admin access
  * to a second account without restarting the server (the first admin is
  * normally granted automatically via ADMIN_BOOTSTRAP_EMAILS on login; see
  * app/api/auth/session/route.ts).

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Play, CheckCircle2, XCircle, Terminal } from "lucide-react";
 import clsx from "clsx";
 import { PedroButton, PedroCard, PedroCardEyebrow } from "@/components/pedro";
+import { CodeEditor } from "./CodeEditor";
 import { api, ApiClientError } from "@/lib/client/api";
 import { useToast } from "@/lib/client/useToast";
 import type { CodeLanguage, CodeTaskConfig } from "@/types/content";
@@ -41,21 +42,6 @@ export function CodeWorkspace({ task, onEvaluated, previousResult }: WorkspacePr
 
   const visibleTests = config.testCases.filter((tc) => !tc.hidden);
 
-  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === "Tab") {
-      e.preventDefault();
-      const target = e.currentTarget;
-      const start = target.selectionStart;
-      const end = target.selectionEnd;
-      const indent = language === "python" ? "    " : "  ";
-      const next = code.slice(0, start) + indent + code.slice(end);
-      setCode(next);
-      requestAnimationFrame(() => {
-        target.selectionStart = target.selectionEnd = start + indent.length;
-      });
-    }
-  }
-
   async function handleRun() {
     setSubmitting(true);
     try {
@@ -82,7 +68,7 @@ export function CodeWorkspace({ task, onEvaluated, previousResult }: WorkspacePr
                 aria-selected={language === lang}
                 onClick={() => setLanguage(lang)}
                 className={clsx(
-                  "rounded-pd-pill px-3 py-1 text-xs font-medium transition-colors",
+                  "flex min-h-9 items-center rounded-pd-pill px-3 text-xs font-medium transition-colors",
                   language === lang ? "bg-pd-mint text-pd-charcoal" : "text-text-secondary hover:text-foreground"
                 )}
               >
@@ -95,15 +81,7 @@ export function CodeWorkspace({ task, onEvaluated, previousResult }: WorkspacePr
 
       <div className="mt-3 grid gap-5 lg:grid-cols-[1.4fr_1fr]">
         <div>
-          <textarea
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            onKeyDown={handleKeyDown}
-            spellCheck={false}
-            autoCapitalize="off"
-            autoCorrect="off"
-            className="h-80 w-full resize-y rounded-pd-md border border-border-subtle bg-surface-deep p-4 font-mono text-sm leading-relaxed text-foreground focus:outline-none focus:border-pd-mint focus:ring-2 focus:ring-pd-mint/30"
-          />
+          <CodeEditor value={code} onChange={setCode} language={language} ariaLabel="Code editor" />
           <PedroButton className="mt-4" onClick={handleRun} loading={submitting} size="lg">
             <Play className="size-4" aria-hidden />
             Run tests
@@ -143,6 +121,14 @@ export function CodeWorkspace({ task, onEvaluated, previousResult }: WorkspacePr
                   </li>
                 ))}
               </ul>
+              {previousResult.evaluation.warnings && (
+                <div className="mt-2 rounded-pd-md bg-amber-500/10 px-3 py-2 text-xs text-amber-600">
+                  <p className="font-medium">Compiled with warnings</p>
+                  <pre className="mt-1 whitespace-pre-wrap break-words font-mono opacity-90">
+                    {previousResult.evaluation.warnings}
+                  </pre>
+                </div>
+              )}
             </div>
           )}
         </div>

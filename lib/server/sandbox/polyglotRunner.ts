@@ -202,16 +202,14 @@ export function gradeMarkerOutput(stdout: string, config: CodeTaskConfig): CodeR
   const testResults: TestResult[] = config.testCases.map((tc, i) => {
     const actual = values[i];
     const passed = deepEqual(actual, tc.expected);
-    return {
-      id: tc.id,
-      passed,
-      hidden: Boolean(tc.hidden),
-      ...(passed
-        ? {}
-        : tc.hidden
-          ? { error: "Hidden case failed" }
-          : { actual: JSON.stringify(actual), expected: JSON.stringify(tc.expected) }),
-    };
+    if (tc.hidden) {
+      // Never leak a hidden case's answer key over the wire, whether it
+      // passed or failed - the client only ever shows "hidden case" for these.
+      return { id: tc.id, passed, hidden: true, ...(passed ? {} : { error: "Hidden case failed" }) };
+    }
+    // Visible cases always carry actual/expected, pass or fail - the UI
+    // shows "expected X" (with a checkmark) even on a pass.
+    return { id: tc.id, passed, hidden: false, actual: JSON.stringify(actual), expected: JSON.stringify(tc.expected) };
   });
 
   const passedCount = testResults.filter((r) => r.passed).length;
@@ -244,6 +242,8 @@ export function gradeMarkerOutput(stdout: string, config: CodeTaskConfig): CodeR
 /** Backend-neutral execution outcome. */
 interface ExecOutcome {
   compileError: string | null;
+  /** Diagnostics from a compile that still succeeded (e.g. unused-variable notes). */
+  warnings: string | null;
   stdout: string;
   stderr: string;
   crashed: boolean;
@@ -302,6 +302,7 @@ async function executeOnPiston(
   if (response.compile && response.compile.code !== 0) {
     return {
       compileError: response.compile.stderr || response.compile.stdout || "Compilation failed.",
+      warnings: null,
       stdout: "",
       stderr: "",
       crashed: false,
@@ -309,8 +310,10 @@ async function executeOnPiston(
     };
   }
   const stderr = (response.run.stderr ?? "").trim();
+  const compileWarnings = response.compile ? (response.compile.stderr ?? "").trim() : "";
   return {
     compileError: null,
+    warnings: compileWarnings || null,
     stdout: response.run.stdout ?? "",
     stderr,
     crashed: response.run.code !== 0 && response.run.code !== null,
@@ -349,11 +352,12 @@ async function executeOnWandbox(
   // compile failure when the program produced no run stage at all.
   const ranNothing = !response.program_output && !response.program_error && response.status !== "0";
   if (compileError && ranNothing) {
-    return { compileError, stdout: "", stderr: "", crashed: false, timedOut: false };
+    return { compileError, warnings: null, stdout: "", stderr: "", crashed: false, timedOut: false };
   }
 
   return {
     compileError: null,
+    warnings: compileError || null, // same field, but the run still succeeded - these are just diagnostics
     stdout: response.program_output ?? "",
     stderr: (response.program_error ?? "").trim(),
     crashed: response.status !== "0" && !response.signal,
@@ -382,7 +386,10 @@ export async function runPolyglotTask(
   }
 
   const graded = gradeMarkerOutput(outcome.stdout, config);
-  if (graded) return graded;
+  if (graded) {
+    if (outcome.warnings) graded.evaluation.warnings = firstErrorLines(outcome.warnings, 6);
+    return graded;
+  }
 
   // No marker line: the program crashed, timed out, or printed over it.
   if (outcome.timedOut) {

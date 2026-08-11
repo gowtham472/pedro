@@ -49,7 +49,7 @@ export default function AdminUsersPage() {
     <PedroCard padding="lg">
       <PedroCardEyebrow>Users ({users.length})</PedroCardEyebrow>
       <p className="mb-3 text-xs text-text-muted">
-        Aggregate progress only — no raw telemetry is exposed here (see the audit log for admin actions).
+        Aggregate progress only - no raw telemetry is exposed here (see the audit log for admin actions).
       </p>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[560px] text-left text-sm">

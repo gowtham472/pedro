@@ -61,10 +61,17 @@ describe("assembleProgram", () => {
 describe("gradeMarkerOutput", () => {
   const max = codeTasks.find((t) => t.id === "swdev-02-array-max")!.config;
 
-  it("passes when all values match expected", () => {
+  it("passes when all values match expected, and every visible case still carries its expected value", () => {
     const result = gradeMarkerOutput("__PEDRO__[9,-1,7,2]\n", max)!;
     expect(result.evaluation.passed).toBe(true);
     expect(result.evaluation.summary).toContain("All 4");
+    // Regression: a passing visible case used to have `expected`/`actual`
+    // stripped entirely (only hidden cases should ever lose that data),
+    // which rendered as the literal text "expected undefined" in the UI.
+    for (const r of result.evaluation.testResults!.filter((r) => !r.hidden)) {
+      expect(r.expected, r.id).toBeDefined();
+      expect(r.actual, r.id).toBeDefined();
+    }
   });
 
   it("fails with per-test detail when a value differs", () => {
@@ -73,6 +80,18 @@ describe("gradeMarkerOutput", () => {
     const failed = result.evaluation.testResults!.find((r) => !r.passed)!;
     expect(failed.hidden).toBe(true);
     expect(failed.error).toBe("Hidden case failed");
+    expect(failed.expected).toBeUndefined(); // hidden failures never leak the answer key
+  });
+
+  it("a mix of passing and failing visible cases each keep their own expected/actual (reported bug)", () => {
+    // t1 expected 9 (pass), t2 expected -1 (fail: got 0), t3 expected 7 (pass), t4 hidden expected 2 (pass)
+    const result = gradeMarkerOutput("__PEDRO__[9,0,7,2]\n", max)!;
+    const [t1, t2, t3, t4] = result.evaluation.testResults!;
+    expect(t1).toMatchObject({ passed: true, expected: "9", actual: "9" });
+    expect(t2).toMatchObject({ passed: false, expected: "-1", actual: "0" });
+    expect(t3).toMatchObject({ passed: true, expected: "7", actual: "7" });
+    expect(t4.hidden).toBe(true);
+    expect(t4.expected).toBeUndefined();
   });
 
   it("ignores learner stdout noise before the marker line", () => {

@@ -1,12 +1,12 @@
 /**
  * Seeds Firestore with Pedro's content (domains, lessons, tasks) from
  * lib/content/*. This is the ONLY place lib/content should be imported
- * outside of unit tests — at runtime the app always reads content back out
+ * outside of unit tests - at runtime the app always reads content back out
  * of Firestore (see lib/server/dal/content.ts), so admin edits made later
  * take effect without a rebuild.
  *
  * Usage: pnpm seed
- * Safe to re-run — every write is an idempotent upsert keyed by content id.
+ * Safe to re-run - every write is an idempotent upsert keyed by content id.
  */
 import { adminDb } from "../lib/firebase/admin";
 import { ALL_DOMAINS, ALL_LESSONS, ALL_TASKS } from "../lib/content";
