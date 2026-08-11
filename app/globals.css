@@ -1,26 +1,188 @@
 @import "tailwindcss";
 
+/* Tailwind v4 CSS-first dark mode: toggled via data-theme attribute on <html> */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Pedro brand palette (see brand_guidelines.md) */
+  --pd-charcoal: #1f1f1f;
+  --pd-graphite: #2b2b2b;
+  --pd-deep: #242424;
+
+  --pd-mint: #dae9d0;
+  --pd-mint-strong: #c3dcb4;
+  --pd-cream: #fff3b5;
+  --pd-cyan: #bfefff;
+
+  --pd-white: #ffffff;
+  --pd-soft-white: #f7f8f4;
+  --pd-muted: #a9aaa5;
+
+  --pd-radius-sm: 14px;
+  --pd-radius-md: 18px;
+  --pd-radius-lg: 24px;
+  --pd-radius-xl: 32px;
+  --pd-radius-pill: 999px;
+
+  --pd-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.16);
+  --pd-shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.1);
+
+  --pd-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Semantic tokens - light theme values (default) */
+  --background: var(--pd-soft-white);
+  --foreground: var(--pd-charcoal);
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --surface-deep: #eef0ea;
+  --border-subtle: rgba(31, 31, 31, 0.08);
+  --text-secondary: #55564f;
+  --text-muted: #7a7b74;
+  --focus-ring: #2f6b3a;
+}
+
+:root[data-theme="dark"] {
+  --background: var(--pd-charcoal);
+  --foreground: var(--pd-soft-white);
+  --surface: var(--pd-graphite);
+  --surface-elevated: #333333;
+  --surface-deep: var(--pd-deep);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --text-secondary: #c7c8c2;
+  --text-muted: var(--pd-muted);
+  --focus-ring: var(--pd-mint);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: var(--pd-charcoal);
+    --foreground: var(--pd-soft-white);
+    --surface: var(--pd-graphite);
+    --surface-elevated: #333333;
+    --surface-deep: var(--pd-deep);
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --text-secondary: #c7c8c2;
+    --text-muted: var(--pd-muted);
+    --focus-ring: var(--pd-mint);
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-deep: var(--surface-deep);
+  --color-border-subtle: var(--border-subtle);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --color-pd-charcoal: var(--pd-charcoal);
+  --color-pd-graphite: var(--pd-graphite);
+  --color-pd-deep: var(--pd-deep);
+  --color-pd-mint: var(--pd-mint);
+  --color-pd-mint-strong: var(--pd-mint-strong);
+  --color-pd-cream: var(--pd-cream);
+  --color-pd-cyan: var(--pd-cyan);
+  --color-pd-white: var(--pd-white);
+  --color-pd-soft-white: var(--pd-soft-white);
+  --color-pd-muted: var(--pd-muted);
+
+  --radius-pd-sm: var(--pd-radius-sm);
+  --radius-pd-md: var(--pd-radius-md);
+  --radius-pd-lg: var(--pd-radius-lg);
+  --radius-pd-xl: var(--pd-radius-xl);
+  --radius-pd-pill: var(--pd-radius-pill);
+
+  --shadow-pd-lg: var(--pd-shadow-lg);
+  --shadow-pd-sm: var(--pd-shadow-sm);
+
+  --font-sans: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-color: var(--border-subtle);
+  }
+
+  html {
+    color-scheme: light dark;
+  }
+
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+
+  ::selection {
+    background: var(--pd-mint);
+    color: var(--pd-charcoal);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+
+  .animate-xp-pop {
+    animation: xp-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  .animate-xp-rise {
+    animation: xp-rise 0.4s ease-out both;
+  }
+}
+
+@keyframes xp-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes xp-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Print styles for the career report export */
+@media print {
+  nav,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
 }

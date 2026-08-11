@@ -33,8 +33,18 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# firebase service account keys (never commit - grants full Firestore/Auth admin access)
+*firebase-adminsdk*.json
+serviceAccountKey.json
+
 # vercel
 .vercel
+
+# firebase emulator data + logs
+.firebase-data
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
 
 # typescript
 *.tsbuildinfo

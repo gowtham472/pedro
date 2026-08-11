@@ -1,0 +1,30 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "taskAttempts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "taskId", "order": "ASCENDING" },
+        { "fieldPath": "attemptNumber", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "domainScores",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "overallScore", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
