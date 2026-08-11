@@ -25,15 +25,14 @@ export function PedroToggle({ checked, onChange, label, description, disabled }:
         disabled={disabled}
         onClick={() => onChange(!checked)}
         className={clsx(
-          "relative mt-0.5 h-7 w-12 shrink-0 rounded-pd-pill transition-colors disabled:opacity-50",
-          checked ? "bg-pd-mint" : "bg-surface-elevated border border-border-subtle"
+          "relative mt-0.5 h-7 w-12 shrink-0 rounded-pd-pill border transition-colors disabled:opacity-50",
+          checked ? "bg-pd-mint border-pd-mint" : "bg-pd-muted/35 border-border-subtle"
         )}
       >
         <span
           className={clsx(
             "absolute top-0.5 size-6 rounded-full bg-white shadow-pd-sm transition-transform",
-            checked ? "translate-x-[22px]" : "translate-x-0.5",
-            !checked && "bg-pd-charcoal/40"
+            checked ? "translate-x-[22px]" : "translate-x-0.5"
           )}
         />
       </button>
