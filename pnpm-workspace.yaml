@@ -1,3 +1,15 @@
+overrides:
+  # firebase-admin -> jwks-rsa -> jose@6.x, and jose 6 dropped its CJS build
+  # entirely (ESM-only). jwks-rsa's utils.js does a synchronous CJS
+  # `require('jose')`, which throws ERR_REQUIRE_ESM in production (seen on
+  # Vercel; ordinary local `node -e "require('firebase-admin/auth')"` didn't
+  # reproduce it, but the deployed serverless runtime's module loader does
+  # not support Node's require(esm) interop for this case). jose 5.x still
+  # ships a real `require` export condition and exposes the exact same
+  # importJWK/exportSPKI API jwks-rsa@4.1.0 calls, so pinning down one major
+  # version removes the whole ESM/CJS mismatch instead of relying on runtime
+  # interop support.
+  jose: 5.10.0
 allowBuilds:
   '@firebase/util': true
   core-js: true

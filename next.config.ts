@@ -15,7 +15,12 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["sql.js"],
+  // firebase-admin is already on Next's default serverExternalPackages list;
+  // listed explicitly here so that stays true regardless of Next's defaults.
+  // (The jose ESM/CJS crash this used to cause is fixed via the `jose`
+  // override in pnpm-workspace.yaml, not by externalizing - firebase-admin
+  // was already external when that error happened.)
+  serverExternalPackages: ["sql.js", "firebase-admin"],
   async headers() {
     return [
       {
