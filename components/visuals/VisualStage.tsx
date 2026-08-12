@@ -97,7 +97,7 @@ export function VisualStage({ title, captions, autoMs = 3000, viewBox = "0 0 640
               setPlaying(false);
               setStep((s) => Math.max(0, s - 1));
             }}
-            className="flex size-7 items-center justify-center rounded-full text-white/70 hover:bg-white/10 disabled:opacity-30"
+            className="flex size-9 items-center justify-center rounded-full text-white/70 hover:bg-white/10 disabled:opacity-30"
           >
             <ChevronLeft className="size-4" aria-hidden />
           </button>
@@ -112,7 +112,7 @@ export function VisualStage({ title, captions, autoMs = 3000, viewBox = "0 0 640
                 setPlaying((p) => !p);
               }
             }}
-            className="flex size-7 items-center justify-center rounded-full text-white/90 hover:bg-white/10"
+            className="flex size-9 items-center justify-center rounded-full text-white/90 hover:bg-white/10"
           >
             {atEnd ? (
               <RotateCcw className="size-4" aria-hidden />
@@ -130,22 +130,33 @@ export function VisualStage({ title, captions, autoMs = 3000, viewBox = "0 0 640
               setPlaying(false);
               setStep((s) => Math.min(steps - 1, s + 1));
             }}
-            className="flex size-7 items-center justify-center rounded-full text-white/70 hover:bg-white/10 disabled:opacity-30"
+            className="flex size-9 items-center justify-center rounded-full text-white/70 hover:bg-white/10 disabled:opacity-30"
           >
             <ChevronRight className="size-4" aria-hidden />
           </button>
         </div>
       </div>
 
-      <svg viewBox={viewBox} className="block w-full" role="img" aria-label={`${title}: ${captions[step]}`}>
-        {children(step)}
-      </svg>
+      {/* On phones the full 640-unit scene squeezed into ~375px shrinks its
+          labels below legibility - so below `sm` the scene keeps a readable
+          minimum width and scrolls sideways instead (the app's standard
+          wide-content pattern). On sm+ it fits the card exactly as before. */}
+      <div className="scrollbar-thin overflow-x-auto">
+        <svg
+          viewBox={viewBox}
+          className="block w-full min-w-[560px] sm:min-w-0"
+          role="img"
+          aria-label={`${title}: ${captions[step]}`}
+        >
+          {children(step)}
+        </svg>
+      </div>
 
-      <div className="flex items-center justify-between gap-3 px-4 pb-3">
+      <div className="flex flex-col gap-2 px-4 pb-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
         <p key={step} className="min-h-10 text-sm leading-snug animate-xp-rise" style={{ color: V.text }}>
           {captions[step]}
         </p>
-        <div className="flex shrink-0 items-center gap-1.5" role="tablist" aria-label="Steps">
+        <div className="flex shrink-0 items-center gap-1" role="tablist" aria-label="Steps">
           {captions.map((_, i) => (
             <button
               key={i}
@@ -155,9 +166,13 @@ export function VisualStage({ title, captions, autoMs = 3000, viewBox = "0 0 640
                 setPlaying(false);
                 setStep(i);
               }}
-              className={clsx("size-2 rounded-full transition-colors")}
-              style={{ background: i === step ? V.mint : i < step ? V.faint : "#3a3a3a" }}
-            />
+              className="flex size-6 items-center justify-center"
+            >
+              <span
+                className={clsx("size-2 rounded-full transition-colors")}
+                style={{ background: i === step ? V.mint : i < step ? V.faint : "#3a3a3a" }}
+              />
+            </button>
           ))}
         </div>
       </div>
