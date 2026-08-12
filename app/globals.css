@@ -151,6 +151,71 @@
   .animate-xp-rise {
     animation: xp-rise 0.4s ease-out both;
   }
+
+  /* Career-path map: same motion language as the concept explainers -
+     smooth eased entrances (--pd-ease), no bounce or overshoot. The trail
+     draws forward and chosen technologies glide into the inventory. */
+  .animate-node-in {
+    animation: node-in 0.6s var(--pd-ease) both;
+  }
+
+  /* Newest road segment: the dashed stripes march forward along the path -
+     the "travelling" feel - then settle. Older segments sit static. */
+  .animate-stripe {
+    animation: stripe-travel 0.9s var(--pd-ease) both;
+  }
+
+  .animate-map-pin {
+    animation: map-pin 0.5s var(--pd-ease) both;
+  }
+
+  .animate-collect {
+    animation: collect-pop 0.7s var(--pd-ease) both;
+  }
+}
+
+@keyframes node-in {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes stripe-travel {
+  from {
+    stroke-dashoffset: 76;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes map-pin {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes collect-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--pd-mint) 35%, transparent);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 transparent;
+  }
 }
 
 @keyframes xp-pop {

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ComponentType } from "react";
-import { VariablesVisual, ConditionsVisual, LoopsVisual, FunctionsVisual, ArraysVisual, DebuggingVisual } from "./day1";
+import { SoftwareAnatomyVisual, ProgramVisual, VariablesVisual, ConditionsVisual, LoopsVisual, FunctionsVisual, ArraysVisual, DebuggingVisual } from "./day1";
 import { AlgorithmicThinkingVisual, DecomposeVisual, SearchSortVisual, ComplexityVisual } from "./day2";
 import { SpacingVisual, TypographyVisual, ColorVisual, HierarchyVisual, ComponentsVisual } from "./day3";
 import { SelectVisual, WhereVisual, GroupByVisual, JoinVisual, ChartsVisual } from "./day4";
@@ -13,6 +13,8 @@ import { AuthVisual, HttpVisual, LogsVisual, MistakesVisual } from "./day6";
 // renders nothing).
 const REGISTRY: Record<string, ComponentType> = {
   // day 1 - software development
+  "software-anatomy": SoftwareAnatomyVisual,
+  program: ProgramVisual,
   variables: VariablesVisual,
   conditions: ConditionsVisual,
   loops: LoopsVisual,

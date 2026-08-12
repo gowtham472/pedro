@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { LayoutDashboard, Compass, BarChart3, ShieldCheck, Settings, LogOut, Sun, Moon, Zap } from "lucide-react";
+import { LayoutDashboard, Compass, BarChart3, Map, ShieldCheck, Settings, LogOut, Sun, Moon, Zap } from "lucide-react";
 import { PedroWordmark } from "./PedroLogo";
 import { useAuth } from "@/lib/client/useAuth";
 import { useTheme } from "@/lib/client/useTheme";
@@ -11,6 +11,7 @@ import { useTheme } from "@/lib/client/useTheme";
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/journey", label: "Journey", icon: Compass },
+  { href: "/paths", label: "Career paths", icon: Map },
   { href: "/results", label: "Results", icon: BarChart3 },
 ];
 

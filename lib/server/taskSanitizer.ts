@@ -64,6 +64,7 @@ function sanitizeConfig(config: TaskConfig): TaskConfig {
     case "security":
       return {
         type: "security",
+        eyebrow: config.eyebrow,
         briefing: config.briefing,
         exhibits: config.exhibits,
         questions: config.questions.map((q) => ({

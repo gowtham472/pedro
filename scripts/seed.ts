@@ -29,6 +29,18 @@ async function seed() {
     await upsertTask(task);
   }
 
+  // Remove task docs whose ids no longer exist in content - otherwise
+  // deleted/renamed tasks linger in Firestore and keep appearing in days.
+  // (Only the content collection is pruned; user attempts are never touched.)
+  const liveTaskIds = new Set(ALL_TASKS.map((t) => t.id));
+  const existingTasks = await adminDb.collection("tasks").select().get();
+  for (const doc of existingTasks.docs) {
+    if (!liveTaskIds.has(doc.id)) {
+      console.log(`Pruning removed task: ${doc.id}`);
+      await doc.ref.delete();
+    }
+  }
+
   const scoringConfigDoc = await adminDb.collection("scoringConfig").doc("global").get();
   if (!scoringConfigDoc.exists) {
     console.log("Seeding default scoring weights...");

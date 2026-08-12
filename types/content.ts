@@ -39,6 +39,18 @@ export interface LessonSection {
   body: string;
   /** Optional animated concept visual (see components/visuals/registry.tsx). */
   visualId?: string;
+  /**
+   * Optional multi-language code example rendered as a tabbed snippet.
+   * Learners pick one language and every snippet on the page follows -
+   * the same choice the task workspace's language tabs use.
+   */
+  codeExample?: LessonCodeExample;
+}
+
+export interface LessonCodeExample {
+  /** Small caption above the snippet, e.g. "Declaring variables". */
+  title?: string;
+  code: Record<CodeLanguage, string>;
 }
 
 export interface LessonDefinition {
@@ -252,8 +264,15 @@ export type SecurityExhibit =
   | SecurityExhibitLog
   | SecurityExhibitCode;
 
+/**
+ * Despite the name, this is a general "read exhibits, answer questions"
+ * engine - it also powers code-review and system-design activities in the
+ * software development day.
+ */
 export interface SecurityTaskConfig {
   type: "security";
+  /** Workspace eyebrow label; defaults to "Investigation" when omitted. */
+  eyebrow?: string;
   briefing: string;
   exhibits: SecurityExhibit[];
   questions: SecurityQuestion[];

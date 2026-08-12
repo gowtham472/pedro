@@ -7,6 +7,7 @@ import { CheckCircle2, Clock, ArrowRight, Star, Zap } from "lucide-react";
 import { PedroCard, PedroCardEyebrow, PedroPill, PedroShell } from "@/components/pedro";
 import { MarkdownLite } from "@/components/pedro/MarkdownLite";
 import { ConceptVisual } from "@/components/visuals/registry";
+import { CodeSnippetTabs } from "@/components/pedro/CodeSnippetTabs";
 import { DOMAIN_ICON_MAP } from "@/components/pedro/icons/DomainIcons";
 import { api, ApiClientError } from "@/lib/client/api";
 import { useToast } from "@/lib/client/useToast";
@@ -181,6 +182,7 @@ export default function DayPage({ params }: { params: Promise<{ day: string }> }
                       <h3 className="text-sm font-semibold">{section.heading}</h3>
                       <MarkdownLite text={section.body} />
                       <ConceptVisual id={section.visualId} />
+                      {section.codeExample && <CodeSnippetTabs example={section.codeExample} />}
                     </div>
                   ))}
                 </div>

@@ -4,6 +4,168 @@ import { Arrow, Box, Chip, G, Txt, V, VisualStage } from "./VisualStage";
 
 // Day 1 - Software Development: programming fundamentals, visualized.
 
+export function SoftwareAnatomyVisual() {
+  const captions = [
+    "Every app you've ever used is three parts talking: the app on your device, a server, and a database.",
+    "You tap \"Place order\". The app sends a request across the internet to the server...",
+    "...the server does the thinking - is this promo code valid? is the restaurant open? - and asks the database to remember the order...",
+    "...then a response travels back, and the app shows \"Order confirmed\". Software development is building all three parts - and the conversations between them.",
+  ];
+  return (
+    <VisualStage title="What software is made of" captions={captions}>
+      {(step) => {
+        const requesting = step === 1;
+        const serverThinking = step === 2;
+        const responding = step >= 3;
+        return (
+          <>
+            {/* phone / client */}
+            <G x={60} y={60} scale={requesting || responding ? 1.04 : 1}>
+              <rect width={90} height={140} rx={14} fill={V.panel} stroke={responding ? V.mint : requesting ? V.cyan : V.stroke} strokeWidth={2} style={{ transition: "all .5s" }} />
+              <rect x={14} y={16} width={62} height={72} rx={6} fill={V.panelLight} />
+              <G x={20} y={100} o={1}>
+                <rect width={50} height={22} rx={11} fill={responding ? V.mint : V.cream} style={{ transition: "fill .5s" }} />
+                <Txt x={25} y={11} anchor="middle" size={9.5} bold color="#1f1f1f">
+                  {responding ? "Done ✓" : "Order"}
+                </Txt>
+              </G>
+              <Txt x={45} y={158} anchor="middle" size={12} color={V.muted}>
+                the app
+              </Txt>
+            </G>
+
+            {/* server */}
+            <G x={280} y={72} scale={serverThinking ? 1.05 : 1}>
+              <Box w={110} h={116} r={12} stroke={serverThinking ? V.cream : V.stroke} />
+              {[0, 1, 2].map((i) => (
+                <G key={i} x={14} y={16 + i * 32}>
+                  <rect width={82} height={22} rx={5} fill={V.panelLight} />
+                  <circle cx={12} cy={11} r={4} fill={serverThinking ? V.cream : V.faint} style={{ transition: "fill .5s" }} />
+                </G>
+              ))}
+              <Txt x={55} y={134} anchor="middle" size={12} color={V.muted}>
+                the server
+              </Txt>
+              {serverThinking && (
+                <Txt x={55} y={-14} anchor="middle" size={11.5} color={V.cream}>
+                  checks the rules
+                </Txt>
+              )}
+            </G>
+
+            {/* database */}
+            <G x={490} y={84} scale={serverThinking ? 1.04 : 1}>
+              <ellipse cx={45} cy={12} rx={45} ry={12} fill={V.panelLight} stroke={V.stroke} />
+              <path d="M 0 12 v 68 a 45 12 0 0 0 90 0 v -68" fill={V.panel} stroke={V.stroke} />
+              <ellipse cx={45} cy={80} rx={45} ry={12} fill={V.panel} stroke={V.stroke} />
+              <Txt x={45} y={112} anchor="middle" size={12} color={V.muted}>
+                the database
+              </Txt>
+              {serverThinking && (
+                <Txt x={45} y={-12} anchor="middle" size={11.5} color={V.mint}>
+                  remembers it
+                </Txt>
+              )}
+            </G>
+
+            {/* request/response arrows */}
+            <Arrow x1={158} y1={110} x2={272} y2={110} color={requesting ? V.cyan : V.faint} o={step >= 1 ? 1 : 0.3} />
+            <G x={168} y={84} o={requesting ? 1 : 0}>
+              <Chip label="request" color={V.cyan} w={72} h={24} />
+            </G>
+            <Arrow x1={398} y1={110} x2={482} y2={110} color={serverThinking ? V.cream : V.faint} o={step >= 2 ? 1 : 0.3} />
+            <Arrow x1={272} y1={150} x2={158} y2={150} color={responding ? V.mint : V.faint} o={responding ? 1 : 0.3} />
+            <G x={168} y={162} o={responding ? 1 : 0}>
+              <Chip label="response" color={V.mint} w={80} h={24} />
+            </G>
+          </>
+        );
+      }}
+    </VisualStage>
+  );
+}
+
+export function ProgramVisual() {
+  const captions = [
+    "A program is a list of instructions. The computer reads them top to bottom, doing exactly what each line says.",
+    "Line 1 runs: put 5 in a box called x. Nothing else happens - just that.",
+    "Line 2 runs: put x + 2 in a box called y. The computer doesn't guess what you meant - it does what you wrote.",
+    "Line 3 runs: show y. The screen prints 7. That's all programming is - precise instructions, in order.",
+  ];
+  const lines = ["x = 5", "y = x + 2", "show y"];
+  return (
+    <VisualStage title="A program runs line by line" captions={captions}>
+      {(step) => (
+        <>
+          {/* instruction list */}
+          <G x={90} y={40}>
+            <Box w={220} h={160} r={12} />
+            {lines.map((line, i) => {
+              const active = step === i + 1;
+              const done = step > i + 1;
+              return (
+                <G key={i} x={14} y={20 + i * 44}>
+                  <rect
+                    x={-6}
+                    y={-14}
+                    width={204}
+                    height={36}
+                    rx={8}
+                    fill={active ? "#2e3a29" : "transparent"}
+                    stroke={active ? V.mint : "transparent"}
+                    strokeWidth={1.5}
+                    style={{ transition: "all .5s ease" }}
+                  />
+                  <Txt mono size={14} color={active ? V.mint : done ? V.muted : V.text}>
+                    {line}
+                  </Txt>
+                  {done && (
+                    <Txt x={182} size={13} color={V.mint}>
+                      ✓
+                    </Txt>
+                  )}
+                </G>
+              );
+            })}
+            <Txt x={110} y={-16} anchor="middle" size={12} color={V.muted}>
+              your program
+            </Txt>
+          </G>
+
+          <Arrow x1={318} y1={120} x2={392} y2={120} o={step >= 1 ? 0.9 : 0.3} color={V.muted} />
+
+          {/* memory boxes */}
+          <G x={404} y={46} o={step >= 1 ? 1 : 0.25}>
+            <Box w={80} h={54} label={step >= 1 ? "5" : ""} mono fontSize={16} labelColor={V.cyan} />
+            <Txt x={40} y={-13} anchor="middle" size={12} mono color={V.mint}>
+              x
+            </Txt>
+          </G>
+          <G x={500} y={46} o={step >= 2 ? 1 : 0.25}>
+            <Box w={80} h={54} label={step >= 2 ? "7" : ""} mono fontSize={16} labelColor={V.cyan} />
+            <Txt x={40} y={-13} anchor="middle" size={12} mono color={V.mint}>
+              y
+            </Txt>
+          </G>
+
+          {/* screen output */}
+          <G x={404} y={140} o={step >= 3 ? 1 : 0.25}>
+            <Box w={176} h={62} r={10} fill="#1a1a1a" />
+            <Txt x={14} y={22} mono size={13} color={V.muted}>
+              output
+            </Txt>
+            {step >= 3 && (
+              <Txt x={14} y={44} mono size={15} color={V.mint}>
+                7
+              </Txt>
+            )}
+          </G>
+        </>
+      )}
+    </VisualStage>
+  );
+}
+
 export function VariablesVisual() {
   const captions = [
     "A variable is a named box in memory. This one is called total - right now it holds nothing.",

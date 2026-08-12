@@ -101,7 +101,7 @@ export function SecurityWorkspace({ task, onEvaluated, previousResult }: Workspa
 
   return (
     <PedroCard padding="lg">
-      <PedroCardEyebrow>Investigation</PedroCardEyebrow>
+      <PedroCardEyebrow>{config.eyebrow ?? "Investigation"}</PedroCardEyebrow>
       <p className="mb-4 text-sm text-text-secondary">{config.briefing}</p>
 
       <div className="flex flex-col gap-4">

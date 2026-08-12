@@ -38,7 +38,7 @@ export function evaluateSecurityTask(
 
   return {
     summary: passed
-      ? "Strong investigation - every finding checks out."
+      ? "Every answer checks out - sharp work."
       : `${passedCount}/${breakdown.length} questions answered correctly. Review the explanations below.`,
     passed,
     breakdown,

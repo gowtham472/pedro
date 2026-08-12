@@ -7,15 +7,9 @@ import { PedroButton, PedroCard, PedroCardEyebrow } from "@/components/pedro";
 import { CodeEditor } from "./CodeEditor";
 import { api, ApiClientError } from "@/lib/client/api";
 import { useToast } from "@/lib/client/useToast";
+import { CODE_LANGUAGE_LABELS as LANGUAGE_LABELS, useCodeLanguage } from "@/lib/client/useCodeLanguage";
 import type { CodeLanguage, CodeTaskConfig } from "@/types/content";
 import type { WorkspaceProps } from "./types";
-
-const LANGUAGE_LABELS: Record<CodeLanguage, string> = {
-  javascript: "JavaScript",
-  python: "Python",
-  java: "Java",
-  c: "C",
-};
 
 export function CodeWorkspace({ task, onEvaluated, previousResult }: WorkspaceProps) {
   const config = task.config as CodeTaskConfig;
@@ -25,7 +19,10 @@ export function CodeWorkspace({ task, onEvaluated, previousResult }: WorkspacePr
     ...(Object.keys(config.variants ?? {}) as CodeLanguage[]),
   ];
 
-  const [language, setLanguage] = useState<CodeLanguage>("javascript");
+  // Language comes from the shared site-wide preference (the same one lesson
+  // snippets use), clamped to what this task actually supports.
+  const { language: preferredLanguage, setLanguage } = useCodeLanguage();
+  const language: CodeLanguage = languages.includes(preferredLanguage) ? preferredLanguage : "javascript";
   // One buffer per language so switching tabs never loses work.
   const [buffers, setBuffers] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = { javascript: config.starterCode };

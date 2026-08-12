@@ -20,28 +20,89 @@ export const problemSolvingLesson: LessonDefinition = {
   title: "Problem solving & DSA",
   summary:
     "How to break an unfamiliar problem into steps, and the handful of array techniques that solve most of them.",
-  estimatedMinutes: 30,
+  estimatedMinutes: 45,
   order: 1,
   sections: [
     {
       heading: "Algorithmic thinking",
       visualId: "algo-thinking",
-      body: "An algorithm is just a sequence of precise steps that gets you from an input to an output. Before writing any code, restate the problem in your own words, then work a small example by hand. If you can't do it on paper, you can't do it in code yet.",
+      body: "Yesterday you learned the words - variables, loops, conditions. Today is about the sentences: **algorithms**, precise step-by-step plans that get you from an input to an output.\n\nThe skill isn't knowing fancy algorithms. It's this habit: restate the problem in your own words, work one small example **by hand on paper**, and only then write code. If you can't do it on paper, you can't do it in code yet - and if you can, the code is mostly translation. Everything on this page works in whichever language you picked yesterday.",
     },
     {
       heading: "Breaking a problem into steps",
       visualId: "decompose",
-      body: "Large problems get easier when split into smaller ones. \"Find the second-largest value\" becomes: find the largest, remove it (conceptually), find the largest of what's left. Naming the sub-steps out loud is often the fastest way to find your approach.",
+      body: "Big problems refuse to be solved all at once - so don't. Split them into steps small enough that each one is obvious.\n\n\"Find the second-largest value\" feels slippery until you split it: (1) find the largest, (2) ignore it, (3) find the largest of what's left. Each step is something you already know how to do from Day 1. Naming the sub-steps out loud - or as comments in your code before writing any logic - is often the fastest way to find your approach.",
     },
     {
-      heading: "Arrays, searching, and sorting",
+      heading: "Pattern 1: the single-pass scan",
       visualId: "search-sort",
-      body: "Most structured-reasoning problems reduce to scanning an array once or twice, or sorting it first to make the scan easier. Sorting costs time but often simplifies the logic that follows - that trade-off is worth noticing.",
+      body: "The most-used tool in this whole domain: walk the array **once**, carrying a little state with you - a \"best so far\", a running total, a count.\n\nYou saw this shape yesterday for finding a maximum. The trick that unlocks harder problems: carry **two** pieces of state. Second-largest? Track the best *and* the second-best, updating both as you walk. One pass, no sorting, works on a million items.",
+      codeExample: {
+        title: "One pass, tracking the best so far",
+        code: {
+          javascript: `function largest(arr) {\n  let best = arr[0];\n  for (const v of arr) {\n    if (v > best) {\n      best = v;    // met something bigger - remember it\n    }\n  }\n  return best;\n}`,
+          python: `def largest(arr):\n    best = arr[0]\n    for v in arr:\n        if v > best:\n            best = v    # met something bigger - remember it\n    return best`,
+          java: `static int largest(int[] arr) {\n  int best = arr[0];\n  for (int v : arr) {\n    if (v > best) {\n      best = v;    // met something bigger - remember it\n    }\n  }\n  return best;\n}`,
+          c: `int largest(const int* arr, int len) {\n  int best = arr[0];\n  for (int i = 1; i < len; i++) {\n    if (arr[i] > best) {\n      best = arr[i];   /* met something bigger */\n    }\n  }\n  return best;\n}`,
+        },
+      },
     },
     {
-      heading: "Complexity intuition",
+      heading: "Pattern 2: counting with a tally",
+      body: "\"How many times does each value appear?\" comes up constantly - duplicates, most-common, frequency of anything. The tool is a **tally**: a structure that maps each value to its count. JavaScript calls it a `Map`, Python a dictionary, Java a `HashMap`.\n\nWalk the array once; for each value, add 1 to its tally entry. Afterwards the tally holds every answer at once: which values appeared, and how often. C has no built-in map - the honest C approach is comparing pairs with two loops, which still works fine at today's sizes.",
+      codeExample: {
+        title: "Tallying how often each value appears",
+        code: {
+          javascript: `const counts = new Map();\nfor (const v of arr) {\n  counts.set(v, (counts.get(v) ?? 0) + 1);\n}\n\n// counts.get(3) → how many times 3 appeared\nfor (const [value, count] of counts) {\n  if (count > 1) {\n    // value is a duplicate\n  }\n}`,
+          python: `counts = {}\nfor v in arr:\n    counts[v] = counts.get(v, 0) + 1\n\n# counts[3] → how many times 3 appeared\nfor value, count in counts.items():\n    if count > 1:\n        pass  # value is a duplicate`,
+          java: `Map<Integer, Integer> counts = new HashMap<>();\nfor (int v : arr) {\n  counts.merge(v, 1, Integer::sum);  // add 1, starting at 0\n}\n\nfor (Map.Entry<Integer, Integer> e : counts.entrySet()) {\n  if (e.getValue() > 1) {\n    // e.getKey() is a duplicate\n  }\n}`,
+          c: `/* C has no built-in map. For small arrays,\n   count each element with a second loop: */\nfor (int i = 0; i < len; i++) {\n  int count = 0;\n  for (int j = 0; j < len; j++) {\n    if (arr[j] == arr[i]) count++;\n  }\n  if (count > 1) {\n    /* arr[i] is a duplicate */\n  }\n}`,
+        },
+      },
+    },
+    {
+      heading: "Pattern 3: \"have I seen this before?\"",
+      body: "A close cousin of the tally: sometimes you don't need counts, just a yes/no - *have I already met this value?* That's a **set**: things go in, and membership checks are instant.\n\nThe elegant move this enables: while walking the array, ask about the **partner** of the current value. \"Do two numbers sum to 42?\" becomes: for each value `v`, have I already seen `42 - v`? If yes - done, one pass. If no, remember `v` and keep walking.",
+      codeExample: {
+        title: "The seen-set, and the partner trick",
+        code: {
+          javascript: `const seen = new Set();\nfor (const v of arr) {\n  if (seen.has(target - v)) {\n    return true;   // v + its partner = target\n  }\n  seen.add(v);\n}\nreturn false;`,
+          python: `seen = set()\nfor v in arr:\n    if target - v in seen:\n        return True   # v + its partner = target\n    seen.add(v)\nreturn False`,
+          java: `Set<Integer> seen = new HashSet<>();\nfor (int v : arr) {\n  if (seen.contains(target - v)) {\n    return true;   // v + its partner = target\n  }\n  seen.add(v);\n}\nreturn false;`,
+          c: `/* Without a set, check every pair - two loops.\n   j starts at i + 1 so each pair is tried once: */\nfor (int i = 0; i < len; i++) {\n  for (int j = i + 1; j < len; j++) {\n    if (arr[i] + arr[j] == target) {\n      return 1;\n    }\n  }\n}\nreturn 0;`,
+        },
+      },
+    },
+    {
+      heading: "Pattern 4: sort first, think second",
+      body: "Sorting rearranges values into order - and order makes many problems collapse. After sorting: the largest is at the end, equal values sit next to each other, and \"second largest distinct\" is just \"walk backwards until the value changes\".\n\nSorting costs some time up front but often buys much simpler logic. One JavaScript trap worth knowing forever: `.sort()` with no arguments sorts **as text** (so 10 comes before 9) - always pass a comparator for numbers.",
+      codeExample: {
+        title: "Sorting an array of numbers",
+        code: {
+          javascript: `arr.sort((a, b) => a - b);   // ascending\n// WITHOUT the (a, b) => a - b comparator,\n// [10, 9, 2] sorts to [10, 2, 9] - as text!`,
+          python: `arr.sort()              # in place, ascending\nordered = sorted(arr)   # or: a new sorted copy`,
+          java: `import java.util.Arrays;\n\nArrays.sort(arr);       // in place, ascending`,
+          c: `#include <stdlib.h>\n\nint ascending(const void* a, const void* b) {\n  return *(const int*)a - *(const int*)b;\n}\n\nqsort(arr, len, sizeof(int), ascending);`,
+        },
+      },
+    },
+    {
+      heading: "Complexity: why the pattern you pick matters",
       visualId: "complexity",
-      body: "You don't need Big-O notation to build the right instinct: a solution that checks every pair of elements (a loop inside a loop) gets slow fast as the input grows. A solution that makes a single pass, remembering what it's seen, usually scales much better. Noticing \"I'm about to write a loop inside a loop\" is a useful trigger to ask whether there's a faster way.",
+      body: "Two correct solutions can differ wildly in how much work they do. A single pass over n items does n steps. A loop **inside** a loop touches every pair - roughly n² steps. At n = 8 that's 8 versus 28; at n = 1,000 it's a thousand versus half a million.\n\nYou don't need formal Big-O notation today - just the instinct: the moment you catch yourself writing a loop inside a loop, pause and ask, \"could a tally or a set remember this for me instead?\" Often the answer is yes, and the n² solution becomes an n one. That reflex is the single most transferable thing in this domain.",
+    },
+    {
+      heading: "Putting it together: how today's tasks work",
+      body: "Same setup as yesterday: complete `solve` in your language of choice, and the tests check what it returns - visible examples plus hidden cases.\n\nToday's three tasks are the three patterns wearing costumes: one wants a **tally** (then sorted output - pattern 4 helps), one wants a **two-variable scan** (mind the edge case where no answer exists), one wants the **partner trick**. Here's a full worked example of a fourth problem so you see the shape: count how many values appear **exactly once**.",
+      codeExample: {
+        title: "Worked example: count values appearing exactly once",
+        code: {
+          javascript: `function solve(arr) {\n  const counts = new Map();\n  for (const v of arr) {\n    counts.set(v, (counts.get(v) ?? 0) + 1);\n  }\n  let unique = 0;\n  for (const count of counts.values()) {\n    if (count === 1) {\n      unique++;\n    }\n  }\n  return unique;   // solve([4, 1, 4, 2]) → 2\n}`,
+          python: `def solve(arr):\n    counts = {}\n    for v in arr:\n        counts[v] = counts.get(v, 0) + 1\n    unique = 0\n    for count in counts.values():\n        if count == 1:\n            unique += 1\n    return unique   # solve([4, 1, 4, 2]) → 2`,
+          java: `class Solution {\n  static int solve(int[] arr) {\n    Map<Integer, Integer> counts = new HashMap<>();\n    for (int v : arr) {\n      counts.merge(v, 1, Integer::sum);\n    }\n    int unique = 0;\n    for (int count : counts.values()) {\n      if (count == 1) {\n        unique++;\n      }\n    }\n    return unique;   // solve([4, 1, 4, 2]) → 2\n  }\n}`,
+          c: `int solve(const int* arr, int len) {\n  int unique = 0;\n  for (int i = 0; i < len; i++) {\n    int count = 0;\n    for (int j = 0; j < len; j++) {\n      if (arr[j] == arr[i]) count++;\n    }\n    if (count == 1) unique++;\n  }\n  return unique;   /* solve({4, 1, 4, 2}, 4) → 2 */\n}`,
+        },
+      },
     },
   ],
 };

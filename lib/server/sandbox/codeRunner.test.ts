@@ -11,18 +11,16 @@ function codeConfig(taskId: string): CodeTaskConfig {
 }
 
 describe("runCodeTask", () => {
-  it("passes a correct FizzBuzz solution", async () => {
-    const config = codeConfig("swdev-01-conditional-print");
+  it("passes a correctly repaired fix-the-bug solution", async () => {
+    const config = codeConfig("swdev-01-fix-the-bug");
     const code = `
-      function solve(n) {
-        const out = [];
-        for (let i = 1; i <= n; i++) {
-          if (i % 15 === 0) out.push("FizzBuzz");
-          else if (i % 3 === 0) out.push("Fizz");
-          else if (i % 5 === 0) out.push("Buzz");
-          else out.push(String(i));
+      function solve(prices, discount) {
+        let total = 0;
+        for (let i = 0; i < prices.length; i++) {
+          total += prices[i];
         }
-        return out;
+        total -= discount;
+        return total < 0 ? 0 : total;
       }
     `;
     const result = await runCodeTask(config, code);
@@ -30,10 +28,9 @@ describe("runCodeTask", () => {
     expect(result.evaluation.testResults?.every((r) => r.passed)).toBe(true);
   });
 
-  it("fails and reports which cases broke for a wrong solution", async () => {
-    const config = codeConfig("swdev-02-array-max");
-    const code = `function solve(arr) { return arr[0]; }`; // wrong: ignores the rest
-    const result = await runCodeTask(config, code);
+  it("fails the unmodified buggy starter code (the bug is real)", async () => {
+    const config = codeConfig("swdev-01-fix-the-bug");
+    const result = await runCodeTask(config, config.starterCode);
     expect(result.evaluation.passed).toBe(false);
     expect(result.evaluation.testResults?.some((r) => !r.passed)).toBe(true);
   });
@@ -70,12 +67,13 @@ describe("runCodeTask", () => {
   });
 
   it("captures console.log output from the submission", async () => {
-    const config = codeConfig("swdev-03-palindrome");
+    const config = codeConfig("swdev-04-ship-a-feature");
     const code = `
-      function solve(str) {
-        console.log("checking", str);
-        const clean = str.toLowerCase().replace(/[^a-z0-9]/g, "");
-        return clean === clean.split("").reverse().join("");
+      function solve(username) {
+        console.log("checking", username);
+        if (username.length < 3 || username.length > 15) return false;
+        if (!/^[a-zA-Z]/.test(username)) return false;
+        return /^[a-zA-Z0-9_]+$/.test(username);
       }
     `;
     const result = await runCodeTask(config, code);

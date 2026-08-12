@@ -29,10 +29,13 @@ export function PedroToggle({ checked, onChange, label, description, disabled }:
           checked ? "bg-pd-mint border-pd-mint" : "bg-pd-muted/35 border-border-subtle"
         )}
       >
+        {/* Thumb: anchored explicitly at left/top - a button's default
+            text-align:center would otherwise shift an absolutely-positioned
+            child's static position and push the thumb outside the track. */}
         <span
           className={clsx(
-            "absolute top-0.5 size-6 rounded-full bg-white shadow-pd-sm transition-transform",
-            checked ? "translate-x-[22px]" : "translate-x-0.5"
+            "absolute left-0.5 top-1/2 size-6 -translate-y-1/2 rounded-full bg-white shadow-pd-sm transition-transform",
+            checked ? "translate-x-[18px]" : "translate-x-0"
           )}
         />
       </button>

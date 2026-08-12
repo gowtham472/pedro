@@ -47,4 +47,16 @@ const adminApp = createAdminApp();
 export const adminAuth = getAuth(adminApp);
 export const adminDb = getFirestore(adminApp);
 
-adminDb.settings({ ignoreUndefinedProperties: true });
+// settings() may only ever be called once per Firestore instance, and the
+// instance survives dev-server hot reloads while this module re-evaluates -
+// calling it again used to throw and 500 every API route until restart.
+// Guard with a global flag (globalThis also survives reloads).
+const globalFlags = globalThis as { __pedroFirestoreSettingsApplied?: boolean };
+if (!globalFlags.__pedroFirestoreSettingsApplied) {
+  try {
+    adminDb.settings({ ignoreUndefinedProperties: true });
+  } catch {
+    // Already configured by an earlier module instance - fine.
+  }
+  globalFlags.__pedroFirestoreSettingsApplied = true;
+}
