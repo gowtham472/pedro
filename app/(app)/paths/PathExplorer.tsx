@@ -1,13 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
   ArrowRight,
   BookOpen,
-  Check,
   ChevronRight,
   Compass,
   ExternalLink,
@@ -189,35 +188,19 @@ export function PathExplorer() {
         </div>
       </div>
 
-      {/* collected-so-far inventory */}
-      <Inventory chain={chain} onJumpTo={jumpTo} />
+      {/* the journey so far - a horizontal striped road with collected stops */}
+      <JourneyTrail chain={chain} atDestination={Boolean(outcome)} onJumpTo={jumpTo} />
+
+      {chain.length === 0 && (
+        <p className="mt-5 max-w-2xl text-sm leading-relaxed text-text-secondary">{map.intro}</p>
+      )}
 
       {/* domain tech map */}
       <TechStrip map={map} />
 
-      {/* the winding trail */}
       <div className="mt-10">
-        <TrailStart intro={map.intro} showIntro={chain.length === 0} />
-        {chain.map((choice, i) => (
-          <div key={`${choice.id}-${i}`}>
-            <TrailSegment index={i} />
-            <TrailStop choice={choice} index={i} />
-          </div>
-        ))}
-
-        {currentStage && (
-          <>
-            <TrailSegment index={chain.length} toDecision />
-            <DecisionPoint stage={currentStage} onChoose={choose} />
-          </>
-        )}
-
-        {outcome && (
-          <>
-            <TrailSegment index={chain.length} toDecision />
-            <OutcomeSection outcome={outcome} onRestart={restart} onLeaveDomain={leaveDomain} />
-          </>
-        )}
+        {currentStage && <DecisionPoint stage={currentStage} onChoose={choose} />}
+        {outcome && <OutcomeSection outcome={outcome} onRestart={restart} onLeaveDomain={leaveDomain} />}
       </div>
     </PedroShell>
   );
@@ -277,37 +260,138 @@ function DomainPicker({ onPick }: { onPick: (id: DomainId) => void }) {
 }
 
 // ---------------------------------------------------------------------------
-// Inventory - "collected items"
+// The journey trail: a horizontal striped road flowing left to right.
+// Collected choices sit on the line as stops; the newest segment's stripes
+// march forward as you travel. Scrolls horizontally when it outgrows the
+// card, and clicking any stop jumps back to that decision.
 // ---------------------------------------------------------------------------
 
-function Inventory({ chain, onJumpTo }: { chain: PathChoice[]; onJumpTo: (count: number) => void }) {
-  if (chain.length === 0) return null;
+const SEG_W = 170; // px between stops
+const TRAIL_PAD = 56; // px before the start pin / after the head marker
+const TRAIL_H = 128; // svg band height
+
+function trailPoint(i: number): { x: number; y: number } {
+  return { x: TRAIL_PAD + i * SEG_W, y: i % 2 === 0 ? 46 : 88 };
+}
+
+function trailSegmentD(i: number): string {
+  const a = trailPoint(i);
+  const b = trailPoint(i + 1);
+  // Horizontal tangents at both ends: a smooth, even wave with no kinks.
+  const cx = SEG_W * 0.55;
+  return `M ${a.x} ${a.y} C ${a.x + cx} ${a.y}, ${b.x - cx} ${b.y}, ${b.x} ${b.y}`;
+}
+
+function JourneyTrail({
+  chain,
+  atDestination,
+  onJumpTo,
+}: {
+  chain: PathChoice[];
+  atDestination: boolean;
+  onJumpTo: (count: number) => void;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Follow the road: keep the newest stop in view as the journey grows.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollTo({ left: el.scrollWidth, behavior: "smooth" });
+  }, [chain.length]);
+
+  const pointCount = chain.length + 2; // start pin + stops + head marker
+  const width = TRAIL_PAD * 2 + (pointCount - 1) * SEG_W;
+  const head = trailPoint(pointCount - 1);
+
   return (
-    <div className="mt-6 rounded-pd-lg border border-border-subtle bg-surface p-4">
-      <PedroCardEyebrow className="mb-3">Collected on this journey</PedroCardEyebrow>
-      <div className="flex flex-wrap items-center gap-2">
-        {chain.map((choice, i) => (
-          <button
-            key={`${choice.id}-${i}`}
-            type="button"
-            onClick={() => onJumpTo(i + 1)}
-            title={`Jump back to: ${choice.label}`}
-            className={clsx(
-              "flex min-h-11 items-center gap-2.5 rounded-pd-pill border border-pd-mint/60 bg-pd-mint/10 py-1.5 pl-1.5 pr-4 transition-transform hover:scale-[1.03]",
-              i === chain.length - 1 && "animate-collect"
-            )}
+    <PedroCard className="mt-6" padding="md">
+      <PedroCardEyebrow>Your journey</PedroCardEyebrow>
+      <div ref={scrollRef} className="scrollbar-thin -mx-2 overflow-x-auto px-2">
+        <div className="relative" style={{ width, height: TRAIL_H + 34 }}>
+          <svg
+            width={width}
+            height={TRAIL_H}
+            viewBox={`0 0 ${width} ${TRAIL_H}`}
+            className="absolute left-0 top-0"
+            aria-hidden
           >
-            {choice.tech && hasTechLogo(choice.tech.id) ? (
-              <TechLogo id={choice.tech.id} size={32} shape="circle" />
-            ) : (
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-pd-mint text-xs font-bold text-pd-charcoal">
-                {i + 1}
-              </span>
-            )}
-            <span className="text-sm font-medium">{choice.label}</span>
-          </button>
-        ))}
+            {Array.from({ length: pointCount - 1 }, (_, i) => {
+              const newest = i === pointCount - 2;
+              return (
+                <g key={i}>
+                  {/* the road bed */}
+                  <path d={trailSegmentD(i)} fill="none" stroke="var(--border-subtle)" strokeWidth="10" strokeLinecap="round" />
+                  {/* the striped centre line */}
+                  <path
+                    d={trailSegmentD(i)}
+                    fill="none"
+                    stroke="var(--pd-mint-strong)"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeDasharray="11 8"
+                    className={newest ? "animate-stripe" : undefined}
+                  />
+                </g>
+              );
+            })}
+          </svg>
+
+          {/* start pin */}
+          <TrailMarker point={trailPoint(0)} label="Start">
+            <span className="flex size-10 items-center justify-center rounded-full bg-pd-charcoal text-pd-soft-white shadow-pd-sm dark:bg-pd-soft-white dark:text-pd-charcoal">
+              <MapPin className="size-5" aria-hidden />
+            </span>
+          </TrailMarker>
+
+          {/* collected stops */}
+          {chain.map((choice, i) => {
+            const p = trailPoint(i + 1);
+            return (
+              <TrailMarker key={`${choice.id}-${i}`} point={p} label={choice.label}>
+                <button
+                  type="button"
+                  onClick={() => onJumpTo(i + 1)}
+                  title={`Jump back to: ${choice.label}`}
+                  className={clsx(
+                    "block rounded-full ring-2 ring-pd-mint transition-transform hover:scale-105",
+                    i === chain.length - 1 && "animate-collect"
+                  )}
+                >
+                  {choice.tech && hasTechLogo(choice.tech.id) ? (
+                    <TechLogo id={choice.tech.id} size={40} shape="circle" />
+                  ) : (
+                    <span className="flex size-10 items-center justify-center rounded-full bg-pd-mint text-sm font-bold text-pd-charcoal">
+                      {i + 1}
+                    </span>
+                  )}
+                </button>
+              </TrailMarker>
+            );
+          })}
+
+          {/* head of the trail: next decision, or the destination flag */}
+          <TrailMarker point={head} label={atDestination ? "Destination" : "Next decision"}>
+            <span
+              className={clsx(
+                "animate-collect flex size-10 items-center justify-center rounded-full shadow-pd-sm",
+                atDestination ? "bg-pd-mint text-pd-charcoal" : "bg-pd-cream text-pd-charcoal"
+              )}
+            >
+              {atDestination ? <Flag className="size-5" aria-hidden /> : <Compass className="size-5" aria-hidden />}
+            </span>
+          </TrailMarker>
+        </div>
       </div>
+    </PedroCard>
+  );
+}
+
+/** Positions a badge on the road with its caption underneath. */
+function TrailMarker({ point, label, children }: { point: { x: number; y: number }; label: string; children: React.ReactNode }) {
+  return (
+    <div className="absolute flex w-32 flex-col items-center" style={{ left: point.x - 64, top: point.y - 20 }}>
+      {children}
+      <span className="mt-1.5 max-w-full truncate text-center text-xs font-medium text-text-secondary">{label}</span>
     </div>
   );
 }
@@ -342,94 +426,7 @@ function TechStrip({ map }: { map: (typeof CAREER_MAPS)[number] }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// The winding trail
-// ---------------------------------------------------------------------------
-
-/** Alternating anchor points, as fractions of the container width. */
-function sideX(index: number): number {
-  return index % 2 === 0 ? 0.22 : 0.78;
-}
-
-function TrailStart({ intro, showIntro }: { intro: string; showIntro: boolean }) {
-  return (
-    <div className="relative">
-      <div className="flex" style={{ justifyContent: "flex-start", paddingLeft: "6%" }}>
-        <div className="animate-map-pin inline-flex items-center gap-2 rounded-pd-pill bg-pd-charcoal px-5 py-2.5 text-sm font-semibold text-pd-soft-white shadow-pd-sm dark:bg-pd-mint dark:text-pd-charcoal">
-          <MapPin className="size-4" aria-hidden />
-          Start here
-        </div>
-      </div>
-      {showIntro && <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-text-secondary">{intro}</p>}
-    </div>
-  );
-}
-
-/**
- * One S-curved road segment, drawn from the previous stop's side to the next
- * one's. Renders as a soft dashed "route" underlay with a solid line that
- * animates over it - the travelling feel.
- */
-function TrailSegment({ index, toDecision = false }: { index: number; toDecision?: boolean }) {
-  const fromX = 600 * sideX(index);
-  const toX = 600 * sideX(index + 1);
-  // Symmetric control points give a smooth, even S-curve with no kink.
-  const d = `M ${fromX} 4 C ${fromX} 50, ${toX} 50, ${toX} 96`;
-  return (
-    <div className="pointer-events-none -my-1" aria-hidden>
-      <svg viewBox="0 0 600 100" className="h-24 w-full overflow-visible" preserveAspectRatio="none">
-        {/* faint dashed guide - the road */}
-        <path d={d} fill="none" stroke="var(--border-subtle)" strokeWidth="6" strokeLinecap="round" />
-        <path
-          d={d}
-          fill="none"
-          stroke="var(--pd-mint-strong)"
-          strokeWidth="3"
-          strokeLinecap="round"
-          pathLength={100}
-          className="animate-trail"
-          style={{ animationDelay: `${toDecision ? 80 : 0}ms` }}
-        />
-        {/* destination dot of this segment */}
-        <circle cx={toX} cy={96} r="7" fill="var(--pd-mint-strong)" className="animate-map-pin" style={{ animationDelay: "600ms" }} />
-      </svg>
-    </div>
-  );
-}
-
-/** A stop on the trail: the choice already made, placed on its bend. */
-function TrailStop({ choice, index }: { choice: PathChoice; index: number }) {
-  const left = index % 2 === 1; // segment index+1 ends at sideX(index+1)
-  return (
-    <div className={clsx("flex", left ? "justify-start" : "justify-end")}>
-      <div
-        className={clsx("animate-node-in w-full max-w-sm", left ? "pl-[2%] sm:pl-[6%]" : "pr-[2%] sm:pr-[6%]")}
-        style={{ animationDelay: "150ms" }}
-      >
-        <PedroCard padding="sm" className="border-pd-mint/70 bg-pd-mint/10">
-          <div className="flex items-center gap-3">
-            {choice.tech && hasTechLogo(choice.tech.id) ? (
-              <TechLogo id={choice.tech.id} size={40} shape="circle" />
-            ) : (
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-pd-mint text-pd-charcoal">
-                <Check className="size-5" aria-hidden />
-              </span>
-            )}
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold">{choice.label}</p>
-              <p className="truncate text-xs text-text-muted">{choice.tagline}</p>
-            </div>
-            <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-pd-mint text-pd-charcoal">
-              <Check className="size-3.5" aria-hidden />
-            </span>
-          </div>
-        </PedroCard>
-      </div>
-    </div>
-  );
-}
-
-/** The live decision point at the head of the trail. */
+/** The live decision point below the trail. */
 function DecisionPoint({ stage, onChoose }: { stage: PathStage; onChoose: (id: string) => void }) {
   return (
     <div className="animate-node-in" style={{ animationDelay: "250ms" }}>
