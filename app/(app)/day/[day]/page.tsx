@@ -206,11 +206,12 @@ export default function DayPage({ params }: { params: Promise<{ day: string }> }
                   <PedroCard
                     key={task.id}
                     interactive
+                    padding="sm"
                     onClick={() => router.push(`/task/${task.id}`)}
-                    className={upNext ? "ring-2 ring-pd-mint" : undefined}
+                    className={upNext ? "sm:p-6 ring-2 ring-pd-mint" : "sm:p-6"}
                   >
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                      <div className="flex min-w-0 items-start gap-3 sm:items-center">
                         {passed ? (
                           <CheckCircle2 className="size-6 shrink-0 text-pd-mint" aria-hidden />
                         ) : (
@@ -221,12 +222,13 @@ export default function DayPage({ params }: { params: Promise<{ day: string }> }
                             {index + 1}
                           </span>
                         )}
-                        <div>
+                        <div className="min-w-0">
                           <p className="text-sm font-semibold">{task.title}</p>
                           <p className="text-xs text-text-muted">{task.description}</p>
                         </div>
+                        <ArrowRight className="ml-auto mt-0.5 size-4 shrink-0 text-text-muted sm:hidden" aria-hidden />
                       </div>
-                      <div className="flex shrink-0 items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2 pl-9 sm:shrink-0 sm:flex-nowrap sm:pl-0">
                         {upNext && <PedroPill tone="mint">Up next</PedroPill>}
                         <PedroPill tone="muted" icon={<Clock className="size-3" aria-hidden />}>
                           {task.estimatedMinutes} min
@@ -241,7 +243,7 @@ export default function DayPage({ params }: { params: Promise<{ day: string }> }
                           </PedroPill>
                         )}
                         {readyForReflection && <PedroPill tone="mint">Reflect</PedroPill>}
-                        <ArrowRight className="size-4 text-text-muted" aria-hidden />
+                        <ArrowRight className="hidden size-4 shrink-0 text-text-muted sm:block" aria-hidden />
                       </div>
                     </div>
                   </PedroCard>
